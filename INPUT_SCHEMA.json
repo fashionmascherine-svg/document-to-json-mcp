@@ -7,9 +7,7 @@
     "file_url": {
       "title": "PDF URL",
       "type": "string",
-      "description": "Public URL of the PDF file to process (max 20MB). The PDF must be publicly accessible (e.g. Dropbox, Google Drive, web server).",
-      "editor": "textfield",
-      "placeholder": "https://example.com/invoice.pdf"
+      "description": "Public URL of the PDF file to process (max 20MB). The PDF must be publicly accessible."
     },
     "document_type": {
       "title": "Document Type",
@@ -27,15 +25,13 @@
     "language": {
       "title": "Document Language(s)",
       "type": "string",
-      "description": "Languages for OCR and interpretation. Separate with + for multiple languages. ISO codes: ita, eng, spa, fra, deu, por.",
-      "editor": "textfield",
-      "default": "ita+eng",
-      "placeholder": "ita+eng+spa"
+      "description": "Languages for OCR, separate with +. ISO codes: ita, eng, spa, fra, deu, por.",
+      "default": "ita+eng"
     },
     "validate_totals": {
       "title": "Validate Totals (invoices only)",
       "type": "boolean",
-      "description": "If enabled, checks that line item sums match declared totals. Useful for invoices. Discrepancies are reported as warnings.",
+      "description": "Checks that line item sums match declared totals.",
       "editor": "checkbox",
       "default": false
     }
