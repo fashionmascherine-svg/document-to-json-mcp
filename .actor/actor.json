@@ -5,8 +5,8 @@
   "description": "Converte PDF di fatture, estratti conto e contratti in JSON strutturato. Usa DeepSeek AI. Supporta italiano, inglese, spagnolo, tedesco, francese e portoghese.",
   "version": "0.1",
   "buildTag": "latest",
-  "input": "./INPUT_SCHEMA.json",
-  "dockerfile": "./Dockerfile",
+  "input": "../INPUT_SCHEMA.json",
+  "dockerfile": "../Dockerfile",
   "environmentVariables": {
     "DEEPSEEK_API_KEY": "",
     "DEEPSEEK_MODEL": "deepseek-v4-flash",
