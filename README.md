@@ -2,6 +2,10 @@
 
 > **Turn PDFs into structured JSON in seconds. AI-powered, no coding needed.**
 
+![MCP Server](https://img.shields.io/badge/MCP-Server-blue)
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Apify](https://img.shields.io/badge/Apify-Actor-green)
+
 ---
 
 ## 🚀 What does it do?
@@ -66,7 +70,6 @@ Perfect for:
 
 | Feature | Benefit |
 |---|---|
-| **DeepSeek AI** | 50x cheaper than GPT-4o, same accuracy |
 | **Multi-language** | Italian, English, Spanish, German, French, Portuguese |
 | **OCR included** | Works with scanned documents too |
 | **Validation** | Auto-checks totals and dates for accuracy |
@@ -96,13 +99,7 @@ That's it. No configuration, no API keys needed.
 
 - PDFs are processed and **not stored** after extraction
 - Data is available in your private dataset
-- Your DeepSeek API key stays encrypted
-
-## 🧠 Technology
-
-Built with **DeepSeek-v4-flash** — the most cost-effective AI model for document extraction. 
-Compared to GPT-4o, we deliver the same quality at **50x lower cost**, which means you get 
-lower prices and better margins.
+- All API keys stay encrypted
 
 ## 📚 Supported languages
 
