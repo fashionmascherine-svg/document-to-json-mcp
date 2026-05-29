@@ -626,7 +626,7 @@ def main():
     """Entry point for the MCP server.
     
     Modalità STDIO (default): si connette via pipe standard.
-    Modalità HTTP: python -m src.server --http (su http://localhost:$PORT/mcp)
+    Modalità HTTP: python -m src.server --http (su http://0.0.0.0:$PORT/mcp)
     Modalità DEV (senza pagamento): python -m src.server --http --dev
     """
     import os
@@ -653,7 +653,7 @@ def main():
         logger.info(f"Connect to: http://0.0.0.0:{port}/mcp (streamable-http)")
         if dev_mode:
             logger.info("🧪 DEV MODE active")
-        mcp.run(transport="streamable-http", host="0.0.0.0", port=port)
+        mcp.run(transport="streamable-http")
     else:
         logger.info("Starting in STDIO mode (default)...")
         logger.info("For HTTP mode: python -m src.server --http --dev")

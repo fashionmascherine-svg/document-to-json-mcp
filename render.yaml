@@ -8,14 +8,13 @@ services:
     plan: free
     region: frankfurt
     buildCommand: pip install -r requirements.txt
-    startCommand: python -m src.server --http --dev
-    healthCheckPath: /health
+    startCommand: python -m src.http_entry
     envVars:
       - key: DEEPSEEK_API_KEY
         sync: false
       - key: X402_WALLET_ADDRESS
-        value: "0x5FB5441aAAfd2892BE45ec953F856cB46255c433"
+        value: ""
       - key: X402_NETWORK
         value: eip155:8453
-      - key: PORT
-        value: 10000
+      - key: DEV_MODE
+        value: "1"
