@@ -16,12 +16,7 @@
       "description": "Type of document to extract.",
       "editor": "select",
       "default": "invoice",
-      "enum": [
-        { "value": "invoice", "label": "Invoice ($0.02)" },
-        { "value": "bank_statement", "label": "Bank Statement ($0.03)" },
-        { "value": "contract", "label": "Contract ($0.05)" },
-        { "value": "generic", "label": "Generic Document ($0.01)" }
-      ]
+      "enum": ["invoice", "bank_statement", "contract", "generic"]
     },
     "language": {
       "title": "Language(s)",
