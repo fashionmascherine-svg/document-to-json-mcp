@@ -3,13 +3,13 @@
 name: document-to-json-mcp
 description: Convert PDFs to structured JSON. Extract invoices, bank statements, contracts, and more. Pay per call via x402 USDC on Base.
 runtime: python
-entrypoint: python -m src.server
+entrypoint: .venv/bin/python -m src.server
 pricing: x402
 config:
   python:
     version: "3.11"
-  buildCommand: pip install -r requirements.txt
-  startCommand: python -m src.server
+  buildCommand: uv venv && uv pip install -r requirements.txt
+  startCommand: .venv/bin/python -m src.server
 env:
   DEEPSEEK_API_KEY:
     description: API key for DeepSeek API
