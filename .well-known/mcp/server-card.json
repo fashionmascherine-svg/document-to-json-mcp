@@ -1,0 +1,91 @@
+{
+  "name": "document-to-json-mcp",
+  "description": "Convert PDF documents to structured JSON. Extract invoices, bank statements, contracts, and more.",
+  "version": "0.1.0",
+  "tools": [
+    {
+      "name": "parse_invoice",
+      "description": "Extract structured data from an invoice PDF (seller, buyer, line items, totals, VAT, IBAN, payment info)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file_url": {
+            "type": "string",
+            "description": "Public URL of the invoice PDF"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language hint (e.g., 'ita', 'eng', 'ita+eng')",
+            "default": "ita+eng"
+          }
+        },
+        "required": ["file_url"]
+      }
+    },
+    {
+      "name": "parse_bank_statement",
+      "description": "Extract all transactions, balances, fees, and account holder info from a bank statement PDF",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file_url": {
+            "type": "string",
+            "description": "Public URL of the bank statement PDF"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language hint",
+            "default": "ita+eng"
+          }
+        },
+        "required": ["file_url"]
+      }
+    },
+    {
+      "name": "parse_contract",
+      "description": "Extract parties, key clauses, dates, financial terms, and jurisdiction from a contract PDF",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file_url": {
+            "type": "string",
+            "description": "Public URL of the contract PDF"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language hint",
+            "default": "ita+eng"
+          }
+        },
+        "required": ["file_url"]
+      }
+    },
+    {
+      "name": "parse_generic_document",
+      "description": "Extract full text and tables from any PDF document",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "file_url": {
+            "type": "string",
+            "description": "Public URL of the PDF document"
+          },
+          "language": {
+            "type": "string",
+            "description": "Language hint",
+            "default": "ita+eng"
+          }
+        },
+        "required": ["file_url"]
+      }
+    },
+    {
+      "name": "supported_document_types",
+      "description": "List all supported document types with their descriptions and prices (free tool)",
+      "inputSchema": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  ]
+}
