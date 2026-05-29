@@ -65,7 +65,12 @@ else:
         return _price(price=price_amount, currency=currency)
 
 # ── Global instances ────────────────────────────────────────────────
-mcp = FastMCP("document-to-json-mcp")
+import os as _os
+mcp = FastMCP(
+    "document-to-json-mcp",
+    host=_os.getenv("HOST", "127.0.0.1"),
+    port=int(_os.getenv("PORT", "8000")),
+)
 pdf_extractor = PDFExtractor()
 
 # Configure PayMCP (only in production mode)

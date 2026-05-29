@@ -8,16 +8,16 @@ Usage:
 import os
 import sys
 
-# Re-use dev mode detection from server module
-sys.argv.append("--http")
+# CRITICAL: Set env vars BEFORE importing server
+# FastMCP reads these in its constructor for host/port binding
+os.environ.setdefault("HOST", "0.0.0.0")
+os.environ.setdefault("PORT", os.getenv("PORT", "8000"))
+
+# Enable dev mode
 if os.getenv("DEV_MODE", "1") == "1":
     sys.argv.append("--dev")
 
-# Patch environment to force uvicorn to listen on all interfaces
-os.environ["UVICORN_HOST"] = "0.0.0.0"
-os.environ["UVICORN_PORT"] = os.getenv("PORT", "8000")
-
+# Now import and run the server
 from src.server import main
-
-if __name__ == "__main__":
-    main()
+sys.argv.append("--http")
+main()
