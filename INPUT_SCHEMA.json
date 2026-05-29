@@ -7,12 +7,13 @@
     "file_url": {
       "title": "PDF URL",
       "type": "string",
-      "description": "Public URL of the PDF file to process (max 20MB). The PDF must be publicly accessible."
+      "description": "Public URL of the PDF file to process (max 20MB). The PDF must be publicly accessible.",
+      "editor": "textfield"
     },
     "document_type": {
       "title": "Document Type",
       "type": "string",
-      "description": "Type of document to extract. Each type has a different price and specific output format.",
+      "description": "Type of document to extract.",
       "editor": "select",
       "default": "invoice",
       "enum": [
@@ -23,9 +24,10 @@
       ]
     },
     "language": {
-      "title": "Document Language(s)",
+      "title": "Language(s)",
       "type": "string",
       "description": "Languages for OCR, separate with +. ISO codes: ita, eng, spa, fra, deu, por.",
+      "editor": "textfield",
       "default": "ita+eng"
     },
     "validate_totals": {
