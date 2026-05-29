@@ -1,15 +1,10 @@
 """
 HTTP entry point for Render.com / Smithery.
 Binds to 0.0.0.0:<PORT> so Render can detect the open port.
-Also serves /.well-known/mcp/server-card.json for Smithery discovery.
-
-Usage:
-    python -m src.http_entry
 """
 import os
 import sys
 import logging
-import json
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,95 +19,41 @@ if os.getenv("DEV_MODE", "1") == "1":
 
 import uvicorn
 from starlette.applications import Starlette
-from starlette.routing import Route
 from starlette.responses import JSONResponse
+from starlette.middleware import Middleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from src.server import mcp
 
 port = int(os.getenv("PORT", "8000"))
 host = os.getenv("HOST", "0.0.0.0")
 
-# Server card for MCP discovery (helps Smithery skip scanning)
-SERVER_CARD = {
-    "name": "document-to-json-mcp",
-    "description": "Convert PDF documents to structured JSON. Extract invoices, bank statements, contracts, and more.",
-    "version": "0.1.0",
-    "tools": [
-        {
-            "name": "parse_invoice",
-            "description": "Extract structured data from an invoice PDF",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "file_url": {"type": "string", "description": "Public URL of the invoice PDF"},
-                    "language": {"type": "string", "description": "Language hint (e.g., 'ita', 'eng')", "default": "ita+eng"}
-                },
-                "required": ["file_url"]
-            }
-        },
-        {
-            "name": "parse_bank_statement",
-            "description": "Extract transactions, balances, and fees from a bank statement PDF",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "file_url": {"type": "string", "description": "Public URL of the bank statement PDF"},
-                    "language": {"type": "string", "description": "Language hint", "default": "ita+eng"}
-                },
-                "required": ["file_url"]
-            }
-        },
-        {
-            "name": "parse_contract",
-            "description": "Extract parties, clauses, dates, and terms from a contract PDF",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "file_url": {"type": "string", "description": "Public URL of the contract PDF"},
-                    "language": {"type": "string", "description": "Language hint", "default": "ita+eng"}
-                },
-                "required": ["file_url"]
-            }
-        },
-        {
-            "name": "parse_generic_document",
-            "description": "Extract text and tables from any PDF document",
-            "inputSchema": {
-                "type": "object",
-                "properties": {
-                    "file_url": {"type": "string", "description": "Public URL of the PDF"},
-                    "language": {"type": "string", "description": "Language hint", "default": "ita+eng"}
-                },
-                "required": ["file_url"]
-            }
-        },
-        {
-            "name": "supported_document_types",
-            "description": "List all supported document types (free tool)",
-            "inputSchema": {"type": "object", "properties": {}}
-        }
-    ]
-}
-
-async def server_card(request):
-    return JSONResponse(SERVER_CARD)
-
-# Get the MCP Starlette app
+# Get the MCP StreamableHTTP ASGI app
 streamable_app = mcp.streamable_http_app()
 
-# Create combined app with the server card route
-combined = Starlette(
-    routes=[
-        Route("/.well-known/mcp/server-card.json", endpoint=server_card),
-    ]
-)
+class ServerCardMiddleware(BaseHTTPMiddleware):
+    """Middleware to serve server-card.json before MCP handles the request."""
+    SERVER_CARD = {
+        "name": "document-to-json-mcp",
+        "description": "Convert PDF documents to structured JSON. Extract invoices, bank statements, contracts, and more.",
+        "version": "0.1.0",
+        "tools": [
+            {"name": "parse_invoice", "description": "Extract structured data from an invoice PDF", "inputSchema": {"type": "object", "properties": {"file_url": {"type": "string"}, "language": {"type": "string", "default": "ita+eng"}}, "required": ["file_url"]}},
+            {"name": "parse_bank_statement", "description": "Extract transactions from a bank statement PDF", "inputSchema": {"type": "object", "properties": {"file_url": {"type": "string"}, "language": {"type": "string", "default": "ita+eng"}}, "required": ["file_url"]}},
+            {"name": "parse_contract", "description": "Extract parties and clauses from a contract PDF", "inputSchema": {"type": "object", "properties": {"file_url": {"type": "string"}, "language": {"type": "string", "default": "ita+eng"}}, "required": ["file_url"]}},
+            {"name": "parse_generic_document", "description": "Extract text from any PDF", "inputSchema": {"type": "object", "properties": {"file_url": {"type": "string"}, "language": {"type": "string", "default": "ita+eng"}}, "required": ["file_url"]}},
+            {"name": "supported_document_types", "description": "List supported document types", "inputSchema": {"type": "object", "properties": {}}}
+        ]
+    }
+    
+    async def dispatch(self, request, call_next):
+        if request.url.path == "/.well-known/mcp/server-card.json":
+            return JSONResponse(self.SERVER_CARD)
+        return await call_next(request)
 
-# Mount the MCP app at /mcp and root
-from starlette.routing import Mount
-
-combined.router.routes.append(Mount("/", app=streamable_app))
+# Wrap the MCP app with our middleware
+app = ServerCardMiddleware(streamable_app)
 
 logger.info(f"Starting Document-to-JSON MCP Server via uvicorn on {host}:{port}...")
 logger.info(f"MCP endpoint: http://{host}:{port}/mcp")
-logger.info(f"Server card: http://{host}:{port}/.well-known/mcp/server-card.json")
 
-uvicorn.run(combined, host=host, port=port, log_level="info")
+uvicorn.run(streamable_app, host=host, port=port, log_level="info")
