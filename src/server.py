@@ -649,11 +649,11 @@ def main():
         logger.info("x402 payments DISABLED (no wallet configured)")
     
     if use_http:
-        logger.info(f"Starting in HTTP mode on port {port}...")
-        logger.info(f"Connect to: http://localhost:{port}/mcp (streamable-http)")
+        logger.info(f"Starting in HTTP mode on 0.0.0.0:{port}...")
+        logger.info(f"Connect to: http://0.0.0.0:{port}/mcp (streamable-http)")
         if dev_mode:
             logger.info("🧪 DEV MODE active")
-        mcp.run(transport="streamable-http")
+        mcp.run(transport="streamable-http", host="0.0.0.0", port=port)
     else:
         logger.info("Starting in STDIO mode (default)...")
         logger.info("For HTTP mode: python -m src.server --http --dev")
