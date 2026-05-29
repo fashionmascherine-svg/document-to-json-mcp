@@ -626,13 +626,15 @@ def main():
     """Entry point for the MCP server.
     
     Modalità STDIO (default): si connette via pipe standard.
-    Modalità HTTP: python -m src.server --http (su http://localhost:8000/mcp)
+    Modalità HTTP: python -m src.server --http (su http://localhost:$PORT/mcp)
     Modalità DEV (senza pagamento): python -m src.server --http --dev
     """
+    import os
     import sys
     
     use_http = "--http" in sys.argv
     dev_mode = "--dev" in sys.argv
+    port = int(os.getenv("PORT", "8000"))
     
     logger.info("Starting Document-to-JSON MCP Server...")
     logger.info(f"Prices: invoice=${PRICES['parse_invoice']}, "
@@ -647,8 +649,8 @@ def main():
         logger.info("x402 payments DISABLED (no wallet configured)")
     
     if use_http:
-        logger.info("Starting in HTTP mode on port 8000...")
-        logger.info("Connect to: http://localhost:8000/mcp (streamable-http)")
+        logger.info(f"Starting in HTTP mode on port {port}...")
+        logger.info(f"Connect to: http://localhost:{port}/mcp (streamable-http)")
         if dev_mode:
             logger.info("🧪 DEV MODE active")
         mcp.run(transport="streamable-http")

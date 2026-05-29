@@ -1,0 +1,21 @@
+# Render.com deployment configuration
+# https://render.com/docs/deploy-python
+services:
+  - type: web
+    name: document-to-json-mcp
+    runtime: python
+    repo: https://github.com/fashionmascherine-svg/document-to-json-mcp
+    plan: free
+    region: frankfurt
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m src.server --http --dev
+    healthCheckPath: /health
+    envVars:
+      - key: DEEPSEEK_API_KEY
+        sync: false
+      - key: X402_WALLET_ADDRESS
+        value: "0x5FB5441aAAfd2892BE45ec953F856cB46255c433"
+      - key: X402_NETWORK
+        value: eip155:8453
+      - key: PORT
+        value: 10000
