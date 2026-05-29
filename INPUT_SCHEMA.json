@@ -1,34 +1,34 @@
 {
   "title": "Document-to-JSON Converter",
-  "description": "Enter a public PDF URL to extract structured data. Supports invoices, bank statements, contracts, and generic documents. Powered by DeepSeek-v4-flash AI.",
+  "description": "Turn any PDF into structured JSON in seconds. No coding needed. Just paste a URL and get clean, organized data.",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
     "file_url": {
       "title": "PDF URL",
       "type": "string",
-      "description": "Public URL of the PDF file to process (max 20MB). The PDF must be publicly accessible.",
+      "description": "Paste the public link to your PDF file. Supports Dropbox, Google Drive, any web server. Max 20MB.",
       "editor": "textfield"
     },
     "document_type": {
-      "title": "Document Type",
+      "title": "Document type",
       "type": "string",
-      "description": "Type of document to extract.",
+      "description": "What type of document are you processing?",
       "editor": "select",
       "default": "invoice",
       "enum": ["invoice", "bank_statement", "contract", "generic"]
     },
     "language": {
-      "title": "Language(s)",
+      "title": "Language",
       "type": "string",
-      "description": "Languages for OCR, separate with +. ISO codes: ita, eng, spa, fra, deu, por.",
+      "description": "Document language for better accuracy. Use ISO codes separated by +. Default: ita+eng",
       "editor": "textfield",
       "default": "ita+eng"
     },
     "validate_totals": {
-      "title": "Validate Totals (invoices only)",
+      "title": "Validate totals",
       "type": "boolean",
-      "description": "Checks that line item sums match declared totals.",
+      "description": "Check if line item sums match declared totals. Recommended for invoices.",
       "editor": "checkbox",
       "default": false
     }
