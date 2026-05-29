@@ -9,11 +9,11 @@
     "model": "x402",
     "details": "Pay per tool call in USDC on Base mainnet. See individual tool prices."
   },
-  "repository": "https://github.com/tuo-org/document-to-json-mcp",
+  "repository": "https://github.com/fashionmascherine-svg/document-to-json-mcp",
   "license": "MIT",
   "author": {
-    "name": "Tuo Nome",
-    "url": "https://github.com/tuo-org"
+    "name": "fashionmascherine-svg",
+    "url": "https://github.com/fashionmascherine-svg"
   },
   "tags": ["pdf", "invoice", "document", "extraction", "ocr", "x402"],
   "env": {
