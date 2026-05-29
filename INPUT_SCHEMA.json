@@ -1,41 +1,41 @@
 {
   "title": "Document-to-JSON Converter",
-  "description": "Carica l'URL di un PDF per estrarne i dati strutturati. Supporta fatture, estratti conto, contratti e documenti generici. AI powered by DeepSeek-v4-flash.",
+  "description": "Enter a public PDF URL to extract structured data. Supports invoices, bank statements, contracts, and generic documents. Powered by DeepSeek-v4-flash AI.",
   "type": "object",
   "schemaVersion": 1,
   "properties": {
     "file_url": {
-      "title": "URL del PDF",
+      "title": "PDF URL",
       "type": "string",
-      "description": "URL pubblico del file PDF da processare (massimo 20MB). Il PDF deve essere accessibile pubblicamente (es. Dropbox, Google Drive, server web).",
+      "description": "Public URL of the PDF file to process (max 20MB). The PDF must be publicly accessible (e.g. Dropbox, Google Drive, web server).",
       "editor": "textfield",
-      "placeholder": "https://example.com/fattura.pdf"
+      "placeholder": "https://example.com/invoice.pdf"
     },
     "document_type": {
-      "title": "Tipo di documento",
+      "title": "Document Type",
       "type": "string",
-      "description": "Tipo di documento da estrarre. Ogni tipo ha un prezzo diverso e un formato di output specifico.",
+      "description": "Type of document to extract. Each type has a different price and specific output format.",
       "editor": "select",
       "default": "invoice",
       "enum": [
-        { "value": "invoice", "label": "Fattura / Invoice ($0.02)" },
-        { "value": "bank_statement", "label": "Estratto conto / Bank Statement ($0.03)" },
-        { "value": "contract", "label": "Contratto / Contract ($0.05)" },
-        { "value": "generic", "label": "Documento generico / Generic ($0.01)" }
+        { "value": "invoice", "label": "Invoice ($0.02)" },
+        { "value": "bank_statement", "label": "Bank Statement ($0.03)" },
+        { "value": "contract", "label": "Contract ($0.05)" },
+        { "value": "generic", "label": "Generic Document ($0.01)" }
       ]
     },
     "language": {
-      "title": "Lingua/e del documento",
+      "title": "Document Language(s)",
       "type": "string",
-      "description": "Lingue da usare per OCR e interpretazione. Separa con + per multiple lingue. Codici ISO: ita, eng, spa, fra, deu, por.",
+      "description": "Languages for OCR and interpretation. Separate with + for multiple languages. ISO codes: ita, eng, spa, fra, deu, por.",
       "editor": "textfield",
       "default": "ita+eng",
       "placeholder": "ita+eng+spa"
     },
     "validate_totals": {
-      "title": "Validare i totali (solo fatture)",
+      "title": "Validate Totals (invoices only)",
       "type": "boolean",
-      "description": "Se attivo, verifica che la somma delle line items corrisponda al totale dichiarato. Utile per fatture. Se c'è discrepanza, viene segnalata come warning.",
+      "description": "If enabled, checks that line item sums match declared totals. Useful for invoices. Discrepancies are reported as warnings.",
       "editor": "checkbox",
       "default": false
     }

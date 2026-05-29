@@ -2,7 +2,7 @@
   "actorSpecification": 1,
   "name": "document-to-json-converter",
   "title": "Document-to-JSON Converter",
-  "description": "Converte PDF di fatture, estratti conto e contratti in JSON strutturato. Usa DeepSeek AI. Supporta italiano, inglese, spagnolo, tedesco, francese e portoghese.",
+  "description": "Convert PDF invoices, bank statements, and contracts into structured JSON. Powered by DeepSeek AI. Supports Italian, English, Spanish, German, French, and Portuguese.",
   "version": "0.0",
   "buildTag": "latest",
   "input": "../INPUT_SCHEMA.json",

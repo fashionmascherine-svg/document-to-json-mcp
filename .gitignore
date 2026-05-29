@@ -29,5 +29,10 @@ Thumbs.db
 tests/sample_invoices/*.pdf
 !tests/sample_invoices/.gitkeep
 
+# Local config files
+.cursor/
+test_local.py
+tests/test_results.json
+
 # Logs
 *.log

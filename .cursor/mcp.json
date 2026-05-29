@@ -1,7 +1,0 @@
-{
-  "mcpServers": {
-    "document-to-json": {
-      "url": "http://localhost:8000/mcp"
-    }
-  }
-}
