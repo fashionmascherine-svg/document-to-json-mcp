@@ -1,0 +1,20 @@
+{
+  "actorOutputSchemaVersion": 1,
+  "title": "Document-to-JSON Results",
+  "description": "View your extracted JSON data. Each run produces one or more results in the dataset.",
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "string",
+      "title": "Extracted Data",
+      "description": "View all extracted documents from this run",
+      "template": "{{links.apiDefaultDatasetUrl}}/items?view=overview"
+    },
+    "dataset": {
+      "type": "string",
+      "title": "Raw JSON via API",
+      "description": "Access the raw dataset via API",
+      "template": "{{links.apiDefaultDatasetUrl}}/items?format=json"
+    }
+  }
+}
