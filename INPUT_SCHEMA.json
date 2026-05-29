@@ -1,0 +1,44 @@
+{
+  "title": "Document-to-JSON Converter",
+  "description": "Carica l'URL di un PDF per estrarne i dati strutturati. Supporta fatture, estratti conto, contratti e documenti generici. AI powered by DeepSeek-v4-flash.",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "file_url": {
+      "title": "URL del PDF",
+      "type": "string",
+      "description": "URL pubblico del file PDF da processare (massimo 20MB). Il PDF deve essere accessibile pubblicamente (es. Dropbox, Google Drive, server web).",
+      "editor": "textfield",
+      "placeholder": "https://example.com/fattura.pdf"
+    },
+    "document_type": {
+      "title": "Tipo di documento",
+      "type": "string",
+      "description": "Tipo di documento da estrarre. Ogni tipo ha un prezzo diverso e un formato di output specifico.",
+      "editor": "select",
+      "default": "invoice",
+      "enum": [
+        { "value": "invoice", "label": "Fattura / Invoice ($0.02)" },
+        { "value": "bank_statement", "label": "Estratto conto / Bank Statement ($0.03)" },
+        { "value": "contract", "label": "Contratto / Contract ($0.05)" },
+        { "value": "generic", "label": "Documento generico / Generic ($0.01)" }
+      ]
+    },
+    "language": {
+      "title": "Lingua/e del documento",
+      "type": "string",
+      "description": "Lingue da usare per OCR e interpretazione. Separa con + per multiple lingue. Codici ISO: ita, eng, spa, fra, deu, por.",
+      "editor": "textfield",
+      "default": "ita+eng",
+      "placeholder": "ita+eng+spa"
+    },
+    "validate_totals": {
+      "title": "Validare i totali (solo fatture)",
+      "type": "boolean",
+      "description": "Se attivo, verifica che la somma delle line items corrisponda al totale dichiarato. Utile per fatture. Se c'è discrepanza, viene segnalata come warning.",
+      "editor": "checkbox",
+      "default": false
+    }
+  },
+  "required": ["file_url"]
+}

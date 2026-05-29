@@ -1,0 +1,24 @@
+[project]
+name = "document-to-json-mcp"
+version = "0.1.0"
+description = "MCP server that converts PDF documents to structured JSON. Supports invoices, bank statements, contracts."
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.0.0",
+    "paymcp>=0.8.0",
+    "fastmcp>=0.3.0",
+    "PyMuPDF>=1.24.0",
+    "pdf2image>=1.17.0",
+    "pillow>=10.0.0",
+    "pytesseract>=0.3.10",
+    "httpx>=0.27.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.0.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["src*"]

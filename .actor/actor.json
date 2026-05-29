@@ -1,0 +1,36 @@
+{
+  "actorSpecification": 1,
+  "name": "document-to-json-converter",
+  "title": "Document-to-JSON Converter",
+  "description": "Converte PDF di fatture, estratti conto e contratti in JSON strutturato. Usa DeepSeek AI per estrazione accurata. Supporta italiano, inglese, spagnolo, tedesco, francese e portoghese.",
+  "version": "0.1",
+  "buildTag": "latest",
+  "input": "./INPUT_SCHEMA.json",
+  "dockerfile": "./Dockerfile",
+  "storages": {
+    "dataset": {
+      "actorSpecification": 1,
+      "title": "Risultati estrazione",
+      "description": "JSON strutturato con i dati estratti dal documento PDF"
+    }
+  },
+  "environmentVariables": {
+    "DEEPSEEK_API_KEY": {
+      "description": "API key per DeepSeek-v4-flash. Ottienila su https://platform.deepseek.com",
+      "required": true,
+      "secret": true
+    },
+    "DEEPSEEK_MODEL": {
+      "description": "Modello DeepSeek da utilizzare (default: deepseek-v4-flash)",
+      "required": false,
+      "default": "deepseek-v4-flash"
+    },
+    "DEFAULT_LANGUAGE": {
+      "description": "Lingue per OCR (default: ita+eng). Separa con +: ita+eng+spa+fra+deu+por",
+      "required": false,
+      "default": "ita+eng"
+    }
+  },
+  "minMemoryMbytes": 1024,
+  "maxMemoryMbytes": 2048
+}
