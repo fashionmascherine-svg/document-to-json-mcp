@@ -1,7 +1,6 @@
 """
 HTTP entry point for Render.com / Smithery.
-Serves MCP at /mcp and server-card.json at /.well-known/mcp/server-card.json
-for Smithery discovery (skips scan).
+Serves MCP at /mcp and server-card at /.well-known/mcp/server-card.json
 """
 import os, sys, json, logging
 if "--dev" not in sys.argv:
@@ -12,14 +11,13 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("document-to-json-mcp.http")
 
 import uvicorn
-from starlette.applications import Starlette
 from starlette.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 from src.server import mcp
 
 port = int(os.getenv("PORT", "8000"))
 host = os.getenv("HOST", "0.0.0.0")
 
-# Server card for Smithery discovery
 SERVER_CARD = {
     "name": "document-to-json-mcp",
     "description": "Convert PDF documents to structured JSON. Extract invoices, bank statements, contracts, and more.",
@@ -33,28 +31,19 @@ SERVER_CARD = {
     ]
 }
 
-async def server_card(request):
-    return JSONResponse(SERVER_CARD)
+class ServerCardMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        if request.url.path == "/.well-known/mcp/server-card.json":
+            return JSONResponse(SERVER_CARD)
+        return await call_next(request)
 
-async def root(request):
-    return JSONResponse({"status": "ok", "message": "Document-to-JSON MCP Server", "endpoint": "/mcp"})
-
-# Create app with server card route BEFORE MCP mount
-# Smithery reads this to skip full scan
-from starlette.routing import Route
-card_app = Starlette(routes=[
-    Route("/.well-known/mcp/server-card.json", server_card),
-    Route("/", root),
-])
-
-# Mount the MCP app
-from starlette.routing import Mount
-mcp_app = mcp.streamable_http_app()
-card_app.router.routes.append(Mount("/mcp", app=mcp_app))
+# Get the raw MCP app (it already handles /mcp internally)
+app = mcp.streamable_http_app()
+# Wrap with middleware to serve server-card before MCP handles it
+app.add_middleware(ServerCardMiddleware)
 
 logger.info(f"Starting on {host}:{port}")
 logger.info(f"MCP endpoint: /mcp")
 logger.info(f"Server card: /.well-known/mcp/server-card.json")
-logger.info("Smithery will skip scan via server-card.json")
 
-uvicorn.run(card_app, host=host, port=port, log_level="info")
+uvicorn.run(app, host=host, port=port, log_level="info")
