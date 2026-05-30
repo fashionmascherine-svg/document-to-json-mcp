@@ -2,7 +2,7 @@
 HTTP entry point for Render.com / Smithery.
 Serves MCP at /mcp and server-card at /.well-known/mcp/server-card.json
 """
-import os, sys, json, logging
+import os, sys, logging
 if "--dev" not in sys.argv:
     sys.argv.insert(1, "--dev")
 os.environ["DEV_MODE"] = "1"
@@ -11,8 +11,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(me
 logger = logging.getLogger("document-to-json-mcp.http")
 
 import uvicorn
+from starlette.applications import Starlette
 from starlette.responses import JSONResponse
+from starlette.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.routing import Route, Mount
 from src.server import mcp
 
 port = int(os.getenv("PORT", "8000"))
@@ -31,19 +34,26 @@ SERVER_CARD = {
     ]
 }
 
-class ServerCardMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request, call_next):
-        if request.url.path == "/.well-known/mcp/server-card.json":
-            return JSONResponse(SERVER_CARD)
-        return await call_next(request)
+async def server_card(request):
+    return JSONResponse(SERVER_CARD)
 
-# Get the raw MCP app (it already handles /mcp internally)
-app = mcp.streamable_http_app()
-# Wrap with middleware to serve server-card before MCP handles it
-app.add_middleware(ServerCardMiddleware)
+async def health(request):
+    return JSONResponse({"status": "ok"})
+
+# Build Starlette app with routes BEFORE MCP mount
+app = Starlette(routes=[
+    Route("/.well-known/mcp/server-card.json", server_card),
+    Route("/health", health),
+    Route("/", health),
+])
+
+# Mount the MCP app at /mcp
+mcp_app = mcp.streamable_http_app()
+app.router.routes.append(Mount("/mcp", app=mcp_app))
 
 logger.info(f"Starting on {host}:{port}")
 logger.info(f"MCP endpoint: /mcp")
 logger.info(f"Server card: /.well-known/mcp/server-card.json")
+logger.info(f"Health: /health")
 
 uvicorn.run(app, host=host, port=port, log_level="info")
