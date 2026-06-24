@@ -8,7 +8,8 @@
       "title": "PDF URL",
       "type": "string",
       "description": "Public link to your PDF file. Supports Dropbox, Google Drive, or any web server. Max 20MB.",
-      "editor": "textfield"
+      "editor": "textfield",
+      "prefill": "https://raw.githubusercontent.com/fashionmascherine-svg/document-to-json-mcp/main/examples/sample-invoice.pdf"
     },
     "document_type": {
       "title": "Document type",
