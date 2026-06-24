@@ -84,7 +84,7 @@ def validate_bank_statement(data: dict) -> List[str]:
     # ── Transaction count vs balance ────────────────────────────
     if _safe_float(balances.get("total_credits")) is not None:
         calculated_credits = sum(
-            t["amount"] for t in transactions if t.get("type") == "credit"
+            _safe_float(t.get("amount")) for t in transactions if t.get("type") == "credit"
         )
         if abs(calculated_credits - total_credits) > 0.02:
             warnings.append(

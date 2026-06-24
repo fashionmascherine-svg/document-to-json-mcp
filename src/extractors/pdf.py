@@ -65,16 +65,18 @@ class PDFExtractor:
         except Exception as e:
             raise PDFExtractionError(f"Download failed: {str(e)}")
 
-    def extract_text(self, pdf_bytes: bytes) -> Tuple[str, bool]:
+    def extract_text(self, pdf_bytes: bytes, ocr_language: Optional[str] = None) -> Tuple[str, bool]:
         """
         Extract text from PDF bytes.
-        
+
         First attempts native text extraction via PyMuPDF.
         If pages have < 50 chars, falls back to OCR.
-        
+
         Args:
             pdf_bytes: Raw PDF file bytes.
-        
+            ocr_language: Tesseract language(s) to use if OCR is needed
+                (e.g. "eng+ita+spa"). Defaults to DEFAULT_LANGUAGE.
+
         Returns:
             Tuple of (extracted_text, used_ocr_flag).
         """
@@ -104,11 +106,11 @@ class PDFExtractor:
         doc.close()
 
         if needs_ocr:
-            return self._ocr_pdf(pdf_bytes, page_count), True
+            return self._ocr_pdf(pdf_bytes, page_count, ocr_language), True
 
         return "\n\n--- PAGE BREAK ---\n\n".join(text_parts), False
 
-    def _ocr_pdf(self, pdf_bytes: bytes, max_pages: int) -> str:
+    def _ocr_pdf(self, pdf_bytes: bytes, max_pages: int, ocr_language: Optional[str] = None) -> str:
         """
         Convert PDF pages to images and run OCR via Tesseract.
         If Poppler/pdf2image is not installed, returns native text as fallback.
@@ -150,10 +152,11 @@ class PDFExtractor:
             return text
 
         import pytesseract
+        lang = ocr_language or DEFAULT_LANGUAGE
         text_parts = []
         for i, img in enumerate(images):
             try:
-                text = pytesseract.image_to_string(img, lang=DEFAULT_LANGUAGE.replace("+", "+"))
+                text = pytesseract.image_to_string(img, lang=lang)
                 text_parts.append(f"--- PAGE {i+1} ---\n{text}")
             except Exception as e:
                 text_parts.append(f"--- PAGE {i+1} ---\n[OCR Error: {str(e)}]")

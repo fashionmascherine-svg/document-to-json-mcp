@@ -341,24 +341,24 @@ GENERIC_SCHEMA = {
 @price_if(price_amount=PRICES["parse_invoice"], currency="USD")
 async def parse_invoice(
     file_url: str,
-    language: str = "ita+eng",
+    language: str = "eng+ita+spa",
     extract_line_items: bool = True,
     validate_totals: bool = False,
     ctx: Optional[Context] = None,
 ) -> dict:
     """
-    Extract structured data from an invoice PDF.
-    
-    Returns JSON with seller, buyer, line items, totals, and payment info.
-    Supports European (Fattura Elettronica) and international invoice formats.
-    
+    Convert an invoice, receipt, or bill (PDF) into structured JSON.
+
+    Use this tool when you have a PDF URL of an invoice/receipt/bill and need the
+    data as clean JSON: seller, buyer, line items, quantities, unit prices, totals,
+    VAT/tax, IBAN and payment info. Handles both native and scanned PDFs (OCR), and
+    European (Fattura Elettronica) and international invoice formats.
+
     Args:
         file_url: Public URL of the PDF file (max 20MB).
-        language: Document language(s) for OCR. Default: ita+eng.
+        language: OCR language(s) for scanned PDFs, ISO codes joined by '+'. Default: eng+ita+spa.
         extract_line_items: Whether to extract individual line items. Default: true.
         validate_totals: Validate that line item sums match declared totals. Default: false.
-    
-    Cost: $0.02 per document, paid via x402 USDC on Base.
     """
     return await _process_document(
         file_url=file_url,
@@ -367,6 +367,7 @@ async def parse_invoice(
         validation_fn=validate_invoice if validate_totals else None,
         document_type_label="invoice",
         ctx=ctx,
+        language=language,
     )
 
 
@@ -378,21 +379,21 @@ async def parse_invoice(
 @price_if(price_amount=PRICES["parse_bank_statement"], currency="USD")
 async def parse_bank_statement(
     file_url: str,
-    language: str = "ita+eng",
+    language: str = "eng+ita+spa",
     categorize_transactions: bool = False,
     ctx: Optional[Context] = None,
 ) -> dict:
     """
-    Extract structured data from a bank statement PDF.
-    
-    Returns JSON with all transactions, balances, account holder info, and fees.
-    
+    Convert a bank/account statement (PDF) into structured JSON.
+
+    Use this tool when you have a PDF URL of a bank or credit-card statement and need
+    the data as JSON: every transaction (date, description, amount, credit/debit),
+    opening/closing balances, account holder, and fees. Handles native and scanned PDFs (OCR).
+
     Args:
         file_url: Public URL of the PDF file (max 20MB).
-        language: Document language(s) for OCR. Default: ita+eng.
+        language: OCR language(s) for scanned PDFs, ISO codes joined by '+'. Default: eng+ita+spa.
         categorize_transactions: Auto-categorize transactions. Default: false.
-    
-    Cost: $0.03 per document, paid via x402 USDC on Base.
     """
     prompt = BANK_STATEMENT_SYSTEM_PROMPT
     if categorize_transactions:
@@ -405,6 +406,7 @@ async def parse_bank_statement(
         validation_fn=validate_bank_statement,
         document_type_label="bank_statement",
         ctx=ctx,
+        language=language,
     )
 
 
@@ -416,23 +418,24 @@ async def parse_bank_statement(
 @price_if(price_amount=PRICES["parse_contract"], currency="USD")
 async def parse_contract(
     file_url: str,
-    language: str = "ita+eng",
+    language: str = "eng+ita+spa",
     extract_clauses: bool = True,
     extract_financial_terms: bool = True,
     ctx: Optional[Context] = None,
 ) -> dict:
     """
-    Extract structured data from a contract PDF.
-    
-    Returns JSON with parties, key dates, financial terms, and essential clauses.
-    
+    Convert a contract or agreement (PDF) into structured JSON.
+
+    Use this tool when you have a PDF URL of a contract, agreement, or NDA and need
+    the data as JSON: parties and their roles, key dates (effective/expiry/renewal),
+    financial terms, and a summary of key clauses (termination, confidentiality,
+    liability, governing law). Handles native and scanned PDFs (OCR).
+
     Args:
         file_url: Public URL of the PDF file (max 20MB).
-        language: Document language(s) for OCR. Default: ita+eng.
+        language: OCR language(s) for scanned PDFs, ISO codes joined by '+'. Default: eng+ita+spa.
         extract_clauses: Extract key clauses (termination, confidentiality, etc.). Default: true.
         extract_financial_terms: Extract fees, payment terms, penalties. Default: true.
-    
-    Cost: $0.05 per document, paid via x402 USDC on Base.
     """
     return await _process_document(
         file_url=file_url,
@@ -441,6 +444,7 @@ async def parse_contract(
         validation_fn=validate_contract,
         document_type_label="contract",
         ctx=ctx,
+        language=language,
     )
 
 
@@ -452,22 +456,21 @@ async def parse_contract(
 @price_if(price_amount=PRICES["parse_generic_document"], currency="USD")
 async def parse_generic_document(
     file_url: str,
-    language: str = "ita+eng",
+    language: str = "eng+ita+spa",
     extract_tables: bool = True,
     ctx: Optional[Context] = None,
 ) -> dict:
     """
-    Extract text and tables from any PDF document.
-    
-    Less structured than specialized parsers, but more flexible.
-    Returns full text content and detected tables.
-    
+    Extract text and tables from ANY PDF document into JSON (free).
+
+    Use this tool when you have a PDF URL that is not specifically an invoice, bank
+    statement, or contract, or when you just need the raw text and any tables as
+    structured JSON. The most flexible parser. Handles native and scanned PDFs (OCR).
+
     Args:
         file_url: Public URL of the PDF file (max 20MB).
-        language: Document language(s) for OCR. Default: ita+eng.
+        language: OCR language(s) for scanned PDFs, ISO codes joined by '+'. Default: eng+ita+spa.
         extract_tables: Detect and extract tables. Default: true.
-    
-    Cost: $0.01 per document, paid via x402 USDC on Base.
     """
     return await _process_document(
         file_url=file_url,
@@ -475,6 +478,7 @@ async def parse_generic_document(
         output_schema=GENERIC_SCHEMA,
         document_type_label="generic",
         ctx=ctx,
+        language=language,
     )
 
 
@@ -492,25 +496,29 @@ async def supported_document_types() -> dict:
         "document_types": [
             {
                 "type": "invoice",
-                "description": "Fatture, ricevute, note di credito/debito",
+                "tool": "parse_invoice",
+                "description": "Invoices, receipts, bills, credit/debit notes",
                 "price_usd": PRICES["parse_invoice"],
                 "confidence": "high",
             },
             {
                 "type": "bank_statement",
-                "description": "Estratti conto bancari",
+                "tool": "parse_bank_statement",
+                "description": "Bank and credit-card statements",
                 "price_usd": PRICES["parse_bank_statement"],
                 "confidence": "high",
             },
             {
                 "type": "contract",
-                "description": "Contratti, accordi, NDA",
+                "tool": "parse_contract",
+                "description": "Contracts, agreements, NDAs",
                 "price_usd": PRICES["parse_contract"],
                 "confidence": "medium",
             },
             {
                 "type": "generic",
-                "description": "Qualsiasi documento con testo e tabelle",
+                "tool": "parse_generic_document",
+                "description": "Any document — extracts text and tables (free during launch)",
                 "price_usd": PRICES["parse_generic_document"],
                 "confidence": "medium",
             },
@@ -518,11 +526,10 @@ async def supported_document_types() -> dict:
         "limits": {
             "max_file_size_mb": 20,
             "max_pages": 50,
-            "free_tier_calls_per_day": 3,
         },
-        "supported_languages": ["ita", "eng", "fra", "deu", "spa", "por"],
-        "payment_method": "x402 USDC on Base mainnet",
-        "payment_details": "Pay per call. No subscription required. USDC on Base network.",
+        "ocr_languages": ["eng", "ita", "spa"],
+        "input": "A public URL to a PDF file.",
+        "payment_details": "Pay per parsed document. No subscription required.",
     }
 
 
@@ -537,6 +544,7 @@ async def _process_document(
     document_type_label: str,
     ctx: Optional[Context] = None,
     validation_fn=None,
+    language: Optional[str] = None,
 ) -> dict:
     """
     Shared processing pipeline for all document types.
@@ -558,7 +566,7 @@ async def _process_document(
         # ── Step 2: Extract text ────────────────────────────────
         await _report(ctx, 20, 100, "Extracting text from PDF...")
         try:
-            text, used_ocr = pdf_extractor.extract_text(pdf_bytes)
+            text, used_ocr = pdf_extractor.extract_text(pdf_bytes, ocr_language=language)
         except PDFExtractionError as e:
             return _error("extraction_failed", str(e))
 

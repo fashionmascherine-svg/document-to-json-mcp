@@ -3,12 +3,11 @@ Apify Actor entrypoint for Document-to-JSON Converter.
 Processes a PDF from a URL and returns structured JSON.
 Uses DeepSeek-v4-flash for AI-powered extraction.
 
-Pricing (Pay-Per-Event):
-  - invoice-parsed:       $0.02
-  - bank-statement-parsed: $0.03
-  - contract-parsed:      $0.05
-  - generic-parsed:       $0.01
-  - page-processed:       $0.001 (per page for OCR)
+Pricing (Pay-Per-Event, launch prices — set in Apify Console Monetization):
+  - invoice-parsed:        $0.01
+  - bank-statement-parsed: $0.015
+  - contract-parsed:       $0.02
+  - generic-parsed:        free during launch (~$0)
 """
 import os
 import sys
@@ -44,7 +43,7 @@ logger = logging.getLogger("apify-document-to-json")
 # ── Configuration ──────────────────────────────────────────────────
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-flash")
-DEFAULT_LANGUAGE = os.environ.get("DEFAULT_LANGUAGE", "ita+eng")
+DEFAULT_LANGUAGE = os.environ.get("DEFAULT_LANGUAGE", "eng+ita+spa")
 MAX_FILE_SIZE_MB = 20
 
 # ── Prompts and Schemas ────────────────────────────────────────────
@@ -242,10 +241,10 @@ EVENT_NAMES = {
 }
 
 PRICES = {
-    "invoice": 0.02,
-    "bank_statement": 0.03,
-    "contract": 0.05,
-    "generic": 0.01,
+    "invoice": 0.01,
+    "bank_statement": 0.015,
+    "contract": 0.02,
+    "generic": 0.0,
 }
 
 
@@ -287,17 +286,12 @@ async def main():
 
         # ── Step 2: Extract text (with OCR if needed) ──────────
         logger.info("Extracting text from PDF...")
-        text, used_ocr = extractor.extract_text(pdf_bytes)
+        text, used_ocr = extractor.extract_text(pdf_bytes, ocr_language=language)
 
         if not text.strip():
             await _push_error("empty_document", "No text could be extracted from this PDF. The file may be empty, corrupted, or password-protected.")
             await Actor.exit()
             return
-
-        # Charge for page processing (OCR)
-        if used_ocr:
-            await Actor.charge(event_name="page-processed", count=1)
-            logger.info("Charged: page-processed")
 
         # ── Step 3: Call DeepSeek ──────────────────────────────
         logger.info(f"Calling DeepSeek ({doc_type})...")

@@ -22,10 +22,10 @@ Perfect for:
 
 | Type | What you get | Price |
 |---|---|---|
-| **Invoice** | Seller, buyer, line items, totals, VAT, IBAN, payment info | $0.02 |
-| **Bank Statement** | All transactions, balances, fees, account holder | $0.03 |
-| **Contract** | Parties, key clauses, dates, financial terms, jurisdiction | $0.05 |
-| **Generic** | Full text + tables from any document | $0.01 |
+| **Invoice** | Seller, buyer, line items, totals, VAT, IBAN, payment info | $0.01 |
+| **Bank Statement** | All transactions, balances, fees, account holder | $0.015 |
+| **Contract** | Parties, key clauses, dates, financial terms, jurisdiction | $0.02 |
+| **Generic** | Full text + tables from any document | **Free during launch** |
 
 ## ✨ Example output
 
@@ -70,7 +70,7 @@ Perfect for:
 
 | Feature | Benefit |
 |---|---|
-| **Multi-language** | Italian, English, Spanish, German, French, Portuguese |
+| **Multi-language** | English, Italian, Spanish (OCR) |
 | **OCR included** | Works with scanned documents too |
 | **Validation** | Auto-checks totals and dates for accuracy |
 | **Pay per use** | No subscription, pay only for what you process |
@@ -88,12 +88,12 @@ That's it. No configuration, no API keys needed.
 
 | Document type | Price |
 |---|---|
-| Invoice | **$0.02** ($20/1000) |
-| Bank statement | **$0.03** ($30/1000) |
-| Contract | **$0.05** ($50/1000) |
-| Generic | **$0.01** ($10/1000) |
+| Invoice | **$0.01** ($10/1000) |
+| Bank statement | **$0.015** ($15/1000) |
+| Contract | **$0.02** ($20/1000) |
+| Generic | **Free during launch** |
 
-*Pay only for successful extractions. No hidden fees.*
+*Pay-per-event via Apify. Pay only for successful extractions. No subscription, no hidden fees.*
 
 ## 🔒 Privacy
 
@@ -101,8 +101,15 @@ That's it. No configuration, no API keys needed.
 - Data is available in your private dataset
 - All API keys stay encrypted
 
-## 📚 Supported languages
+## 📚 Supported OCR languages
 
-`ita` (Italian), `eng` (English), `spa` (Spanish), `fra` (French), `deu` (German), `por` (Portuguese)
+`eng` (English), `ita` (Italian), `spa` (Spanish)
 
-Combine with `+` for multi-language documents: `ita+eng+spa`
+Combine with `+` for multi-language scanned documents: `eng+ita+spa` (default)
+
+## 🤖 Built for AI agents (MCP)
+
+This Actor is an **MCP server**: AI agents can call it directly as a tool to turn any
+PDF into JSON, with zero configuration — just pass a public `file_url`. Specialized
+tools (`parse_invoice`, `parse_bank_statement`, `parse_contract`) and a free
+`parse_generic_document` make it easy for an LLM to pick the right one for the task.

@@ -2,6 +2,7 @@
 DeepSeek-v4-flash API wrapper for structured document extraction.
 Uses function calling / tool_use to enforce structured JSON output.
 """
+import asyncio
 import json
 from typing import Optional
 import httpx
@@ -43,7 +44,7 @@ class DeepSeekClient:
         system_prompt: str,
         output_schema: dict,
         temperature: float = 0.1,
-        max_tokens: int = 4000,
+        max_tokens: int = 8000,
     ) -> dict:
         """
         Send document text to DeepSeek and get structured JSON output.
@@ -90,19 +91,40 @@ class DeepSeekClient:
             "max_tokens": max_tokens,
         }
 
-        try:
-            response = await self.client.post(
-                f"{self.base_url}/chat/completions",
-                json=payload,
-            )
-            response.raise_for_status()
-        except httpx.TimeoutException:
-            raise DeepSeekError("DeepSeek API request timed out (max 60s)")
-        except httpx.HTTPStatusError as e:
-            error_detail = self._parse_error_response(e.response)
-            raise DeepSeekError(f"DeepSeek API error {e.response.status_code}: {error_detail}")
-        except Exception as e:
-            raise DeepSeekError(f"DeepSeek API request failed: {str(e)}")
+        # Retry on transient errors (timeouts, rate limits, 5xx) with backoff.
+        max_attempts = 3
+        last_error: Optional[Exception] = None
+        response = None
+        for attempt in range(max_attempts):
+            try:
+                response = await self.client.post(
+                    f"{self.base_url}/chat/completions",
+                    json=payload,
+                )
+                response.raise_for_status()
+                break
+            except httpx.TimeoutException as e:
+                last_error = DeepSeekError("DeepSeek API request timed out (max 60s)")
+            except httpx.HTTPStatusError as e:
+                status = e.response.status_code
+                # Retry only on rate limit / server errors; fail fast on 4xx.
+                if status == 429 or status >= 500:
+                    last_error = DeepSeekError(
+                        f"DeepSeek API error {status}: {self._parse_error_response(e.response)}"
+                    )
+                else:
+                    raise DeepSeekError(
+                        f"DeepSeek API error {status}: {self._parse_error_response(e.response)}"
+                    )
+            except Exception as e:
+                last_error = DeepSeekError(f"DeepSeek API request failed: {str(e)}")
+
+            # Backoff before the next attempt (0.5s, 1s) — not after the last one.
+            if attempt < max_attempts - 1:
+                await asyncio.sleep(0.5 * (attempt + 1))
+
+        if response is None:
+            raise last_error or DeepSeekError("DeepSeek API request failed after retries")
 
         try:
             result = response.json()

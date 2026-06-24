@@ -19,14 +19,15 @@ X402_NETWORK = os.getenv("X402_NETWORK", "eip155:8453")  # Base mainnet
 # ─── Processing Limits ─────────────────────────────────────────────
 MAX_FILE_SIZE_MB = int(os.getenv("MAX_FILE_SIZE_MB", "20"))
 MAX_PAGES = int(os.getenv("MAX_PAGES", "50"))
-DEFAULT_LANGUAGE = os.getenv("DEFAULT_LANGUAGE", "ita+eng")
+DEFAULT_LANGUAGE = os.getenv("DEFAULT_LANGUAGE", "eng+ita+spa")
 
-# ─── Pricing per tool (USD) ────────────────────────────────────────
+# ─── Pricing per tool (USD) — launch prices, kept in sync with the ──
+# ─── Apify Console Monetization (PAY_PER_EVENT) for display only. ───
 PRICES: dict[str, float] = {
-    "parse_invoice": 0.02,            # $0.02 per invoice
-    "parse_bank_statement": 0.03,     # $0.03 per bank statement
-    "parse_contract": 0.05,           # $0.05 per contract
-    "parse_generic_document": 0.01,   # $0.01 per generic doc
+    "parse_invoice": 0.01,             # $0.01 per invoice (launch)
+    "parse_bank_statement": 0.015,     # $0.015 per bank statement (launch)
+    "parse_contract": 0.02,            # $0.02 per contract (launch)
+    "parse_generic_document": 0.0,     # free during launch (the hook)
 }
 
 # ─── Free Tier Limits ──────────────────────────────────────────────
