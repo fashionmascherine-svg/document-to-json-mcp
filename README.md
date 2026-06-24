@@ -113,3 +113,87 @@ This Actor is an **MCP server**: AI agents can call it directly as a tool to tur
 PDF into JSON, with zero configuration — just pass a public `file_url`. Specialized
 tools (`parse_invoice`, `parse_bank_statement`, `parse_contract`) and a free
 `parse_generic_document` make it easy for an LLM to pick the right one for the task.
+
+## 🔌 Integrations
+
+> Replace `YOUR_APIFY_TOKEN` with your token from [Apify → Settings → Integrations](https://console.apify.com/account/integrations).
+
+### Claude Code (CLI)
+
+```bash
+claude mcp add --transport http apify \
+  "https://mcp.apify.com/?actors=opportunity-biz/document-to-json-mcp"
+```
+
+### Claude Desktop / Cursor (MCP)
+
+Add to your MCP config (`claude_desktop_config.json` or Cursor's `mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "document-to-json": {
+      "command": "npx",
+      "args": [
+        "-y", "mcp-remote",
+        "https://mcp.apify.com/?actors=opportunity-biz/document-to-json-mcp",
+        "--header", "Authorization: Bearer YOUR_APIFY_TOKEN"
+      ]
+    }
+  }
+}
+```
+
+The agent then sees `parse_invoice`, `parse_bank_statement`, `parse_contract`, and
+`parse_generic_document` as tools and calls them on its own.
+
+### REST API (any language)
+
+One call in, JSON out — `run-sync-get-dataset-items` returns the result directly:
+
+```bash
+curl -X POST \
+  "https://api.apify.com/v2/acts/opportunity-biz~document-to-json-mcp/run-sync-get-dataset-items?token=YOUR_APIFY_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"file_url": "https://example.com/invoice.pdf", "document_type": "invoice", "validate_totals": true}'
+```
+
+### Python
+
+```python
+from apify_client import ApifyClient
+
+client = ApifyClient("YOUR_APIFY_TOKEN")
+run = client.actor("opportunity-biz/document-to-json-mcp").call(run_input={
+    "file_url": "https://example.com/invoice.pdf",
+    "document_type": "invoice",
+})
+for item in client.dataset(run["defaultDatasetId"]).iterate_items():
+    print(item)
+```
+
+### JavaScript / TypeScript
+
+```javascript
+import { ApifyClient } from 'apify-client';
+
+const client = new ApifyClient({ token: 'YOUR_APIFY_TOKEN' });
+const run = await client.actor('opportunity-biz/document-to-json-mcp').call({
+  file_url: 'https://example.com/invoice.pdf',
+  document_type: 'invoice',
+});
+const { items } = await client.dataset(run.defaultDatasetId).listItems();
+console.log(items);
+```
+
+### n8n
+
+Use an **HTTP Request** node (POST) to the REST API URL above, or the official
+**Apify** node → select `document-to-json-mcp` → set `file_url` and `document_type`.
+Great for "watch inbox → extract invoice → append to Google Sheet" workflows.
+
+### LangChain / CrewAI / any MCP framework
+
+Point your agent framework's MCP client at
+`https://mcp.apify.com/?actors=opportunity-biz/document-to-json-mcp` — the parsing
+tools are exposed automatically.
