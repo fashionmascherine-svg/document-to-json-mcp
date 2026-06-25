@@ -12,6 +12,11 @@
 
 Paste a PDF URL → get structured JSON. That's it.
 
+**Powered by AI.** Instead of rigid templates or fragile regex, an AI model actually
+*reads and understands* each document — so it adapts to any layout, language, or vendor,
+and even handles scanned files. That's why the same tool works on an Italian invoice, a
+Spanish receipt, or an English contract without any configuration.
+
 Perfect for:
 - **Accountants** — extract invoice data (numbers, dates, totals, VAT, IBAN)
 - **Developers** — automate document processing in your apps
@@ -66,10 +71,23 @@ Perfect for:
 }
 ```
 
+## 🧪 Live examples — try them now
+
+Run the Actor on these public sample PDFs (synthetic data) to see the extraction quality for yourself:
+
+| Type | Sample PDF | What the AI extracts (highlights) |
+|---|---|---|
+| **Invoice** | [sample-invoice.pdf](https://raw.githubusercontent.com/fashionmascherine-svg/document-to-json-mcp/main/examples/sample-invoice.pdf) | Invoice `INV-2026-0042`, seller + buyer with VAT IDs, 2 line items, VAT 22%, **grand total €1,889.78** — *confidence 1.0* |
+| **Bank statement** | [sample-bank-statement.pdf](https://raw.githubusercontent.com/fashionmascherine-svg/document-to-json-mcp/main/examples/sample-bank-statement.pdf) | 7 transactions auto-categorized, opening/closing balances **reconciled to €8,655.28** — *confidence 1.0* |
+| **Contract** | [sample-contract.pdf](https://raw.githubusercontent.com/fashionmascherine-svg/document-to-json-mcp/main/examples/sample-contract.pdf) | 2 parties + roles, effective/expiry/renewal dates, fee €5,000, **5 key clauses** with summaries, jurisdiction — *confidence 0.95* |
+
+Just paste one of these URLs as `file_url`, pick the matching `document_type`, and run. Each extraction takes ~15–20 seconds.
+
 ## 🎯 Why this Actor?
 
 | Feature | Benefit |
 |---|---|
+| **AI understanding** | An AI reads documents like a human — adapts to any layout, no templates or rules to maintain |
 | **Multi-language** | English, Italian, Spanish (OCR) |
 | **OCR included** | Works with scanned documents too |
 | **Validation** | Auto-checks totals and dates for accuracy |
