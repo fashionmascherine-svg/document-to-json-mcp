@@ -1,7 +1,7 @@
 """
 Document-to-JSON MCP Server
 ============================
-Converts PDF documents to structured JSON using DeepSeek-v4-flash.
+Converts PDF documents to structured JSON using an AI model (OpenAI-compatible LLM).
 Pay-per-call via x402 protocol (USDC on Base).
 
 Tools:
@@ -17,7 +17,7 @@ import sys
 from typing import Optional
 
 from src.config import (
-    DEEPSEEK_API_KEY,
+    LLM_API_KEY,
     X402_WALLET_ADDRESS,
     X402_NETWORK,
     PRICES,
@@ -26,7 +26,7 @@ from src.config import (
     FREE_TOOLS,
 )
 from src.extractors.pdf import PDFExtractor, PDFExtractionError
-from src.llm.deepseek import DeepSeekClient, DeepSeekError
+from src.llm.llm_client import LLMClient, LLMError
 from src.llm.prompts import (
     INVOICE_SYSTEM_PROMPT,
     BANK_STATEMENT_SYSTEM_PROMPT,
@@ -91,22 +91,22 @@ if not DEV_MODE and X402_WALLET_ADDRESS:
 else:
     logger.warning("X402_WALLET_ADDRESS not set. Payments disabled.")
 
-# DeepSeek client — initialized lazily
-_deepseek_client: Optional[DeepSeekClient] = None
+# LLM client — initialized lazily
+_llm_client: Optional[LLMClient] = None
 
 
-def get_deepseek() -> DeepSeekClient:
-    """Get or create the DeepSeek client singleton."""
-    global _deepseek_client
-    if _deepseek_client is None:
-        _deepseek_client = DeepSeekClient(
-            api_key=DEEPSEEK_API_KEY,
+def get_llm() -> LLMClient:
+    """Get or create the LLM client singleton."""
+    global _llm_client
+    if _llm_client is None:
+        _llm_client = LLMClient(
+            api_key=LLM_API_KEY,
         )
-    return _deepseek_client
+    return _llm_client
 
 
 # ══════════════════════════════════════════════════════════════════════
-# INVOICE SCHEMA (for DeepSeek function calling)
+# INVOICE SCHEMA (for LLM structured output)
 # ══════════════════════════════════════════════════════════════════════
 
 INVOICE_SCHEMA = {
@@ -551,7 +551,7 @@ async def _process_document(
     
     1. Download PDF
     2. Extract text (native or OCR)
-    3. Call DeepSeek for structured extraction
+    3. Call the LLM for structured extraction
     4. Validate results
     5. Return JSON
     """
@@ -573,22 +573,22 @@ async def _process_document(
         if not text.strip():
             return _error("empty_document", "No text could be extracted from this PDF. The file may be empty or corrupted.")
 
-        # ── Step 3: Call DeepSeek ───────────────────────────────
-        await _report(ctx, 40, 100, f"Analyzing {document_type_label} with DeepSeek...")
+        # ── Step 3: Call the LLM ────────────────────────────────
+        await _report(ctx, 40, 100, f"Analyzing {document_type_label} with AI...")
         prompt = system_prompt
         if used_ocr:
             prompt += "\n\nNOTE: This document was processed with OCR. Be extra careful with number recognition and formatting."
 
-        deepseek_client = get_deepseek()
+        llm_client = get_llm()
 
         try:
-            result = await deepseek_client.extract_structured(
+            result = await llm_client.extract_structured(
                 text=text,
                 system_prompt=prompt,
                 output_schema=output_schema,
             )
-        except DeepSeekError as e:
-            logger.error(f"DeepSeek extraction failed for {file_url[:50]}: {e}")
+        except LLMError as e:
+            logger.error(f"LLM extraction failed for {file_url[:50]}: {e}")
             return _error("llm_error", f"AI extraction failed: {str(e)}")
 
         # ── Step 4: Validation ──────────────────────────────────

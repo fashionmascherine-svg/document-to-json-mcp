@@ -1,7 +1,7 @@
 """
 Apify Actor entrypoint for Document-to-JSON Converter.
 Processes a PDF from a URL and returns structured JSON.
-Uses DeepSeek-v4-flash for AI-powered extraction.
+Uses an AI model (OpenAI-compatible LLM) for AI-powered extraction.
 
 Pricing (Pay-Per-Event, launch prices — set in Apify Console Monetization):
   - invoice-parsed:        $0.01
@@ -20,7 +20,7 @@ from typing import Optional
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from extractors.pdf import PDFExtractor
-from llm.deepseek import DeepSeekClient
+from llm.llm_client import LLMClient
 from llm.prompts import (
     INVOICE_SYSTEM_PROMPT,
     BANK_STATEMENT_SYSTEM_PROMPT,
@@ -41,8 +41,8 @@ logging.basicConfig(
 logger = logging.getLogger("apify-document-to-json")
 
 # ── Configuration ──────────────────────────────────────────────────
-DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
-DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-flash")
+LLM_API_KEY = os.environ.get("LLM_API_KEY", "")
+LLM_MODEL = os.environ.get("LLM_MODEL", "")
 DEFAULT_LANGUAGE = os.environ.get("DEFAULT_LANGUAGE", "eng+ita+spa")
 MAX_FILE_SIZE_MB = 20
 
@@ -253,8 +253,8 @@ async def main():
     await Actor.init()
 
     # ── Validate API key ───────────────────────────────────────
-    if not DEEPSEEK_API_KEY:
-        await _push_error("missing_config", "DEEPSEEK_API_KEY environment variable is not set. Add it in Actor settings → Environment variables.")
+    if not LLM_API_KEY:
+        await _push_error("missing_config", "LLM_API_KEY environment variable is not set. Add it in Actor settings → Environment variables.")
         await Actor.exit()
         return
 
@@ -293,16 +293,16 @@ async def main():
             await Actor.exit()
             return
 
-        # ── Step 3: Call DeepSeek ──────────────────────────────
-        logger.info(f"Calling DeepSeek ({doc_type})...")
+        # ── Step 3: Call the LLM ───────────────────────────────
+        logger.info(f"Calling the AI model ({doc_type})...")
         prompt = PROMPTS[doc_type]
         schema = SCHEMAS[doc_type]
         if used_ocr:
             prompt += "\n\nNOTE: This document was processed with OCR. Be careful with number recognition."
 
-        client = DeepSeekClient(
-            api_key=DEEPSEEK_API_KEY,
-            model=DEEPSEEK_MODEL,
+        client = LLMClient(
+            api_key=LLM_API_KEY,
+            model=LLM_MODEL,
         )
 
         try:

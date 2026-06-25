@@ -1,21 +1,21 @@
 """
-DeepSeek-v4-flash API wrapper for structured document extraction.
-Uses function calling / tool_use to enforce structured JSON output.
+AI/LLM API wrapper (OpenAI-compatible) for structured document extraction.
+Sends document text to an LLM and enforces structured JSON output.
 """
 import asyncio
 import json
 from typing import Optional
 import httpx
-from src.config import DEEPSEEK_API_KEY, DEEPSEEK_MODEL, DEEPSEEK_BASE_URL
+from src.config import LLM_API_KEY, LLM_MODEL, LLM_BASE_URL
 
 
-class DeepSeekError(Exception):
-    """Base exception for DeepSeek API errors."""
+class LLMError(Exception):
+    """Base exception for LLM API errors."""
     pass
 
 
-class DeepSeekClient:
-    """Async client for DeepSeek-v4-flash with structured output support."""
+class LLMClient:
+    """Async client for an OpenAI-compatible LLM with structured output support."""
 
     def __init__(
         self,
@@ -23,14 +23,14 @@ class DeepSeekClient:
         model: Optional[str] = None,
         base_url: Optional[str] = None,
     ):
-        self.api_key = api_key or DEEPSEEK_API_KEY
-        self.model = model or DEEPSEEK_MODEL
-        self.base_url = base_url or DEEPSEEK_BASE_URL
+        self.api_key = api_key or LLM_API_KEY
+        self.model = model or LLM_MODEL
+        self.base_url = base_url or LLM_BASE_URL
 
         if not self.api_key:
-            raise DeepSeekError(
-                "DEEPSEEK_API_KEY is not set. "
-                "Create a .env file from .env.example and add your key."
+            raise LLMError(
+                "LLM_API_KEY is not set. "
+                "Set it in the Actor's environment variables (or your local .env)."
             )
 
         self.client = httpx.AsyncClient(
@@ -47,22 +47,20 @@ class DeepSeekClient:
         max_tokens: int = 8000,
     ) -> dict:
         """
-        Send document text to DeepSeek and get structured JSON output.
-        
-        Uses function calling to enforce the output schema.
-        
+        Send document text to the LLM and get structured JSON output.
+
         Args:
             text: The extracted document text (max ~50K chars).
             system_prompt: Specialized instruction for the extraction task.
             output_schema: JSON schema for the expected output structure.
             temperature: LLM temperature (low = more deterministic).
             max_tokens: Maximum tokens in the response.
-        
+
         Returns:
             Structured data as a Python dict matching output_schema.
-        
+
         Raises:
-            DeepSeekError: On API errors, parsing failures, or timeouts.
+            LLMError: On API errors, parsing failures, or timeouts.
         """
         # Truncate text to avoid token limits (roughly 50K chars ~ 12K tokens)
         truncated_text = text[:50000]
@@ -70,7 +68,7 @@ class DeepSeekClient:
         # Build the JSON schema instruction
         import json as _json
         schema_str = _json.dumps(output_schema, indent=2)
-        
+
         payload = {
             "model": self.model,
             "messages": [
@@ -104,36 +102,36 @@ class DeepSeekClient:
                 response.raise_for_status()
                 break
             except httpx.TimeoutException as e:
-                last_error = DeepSeekError("DeepSeek API request timed out (max 60s)")
+                last_error = LLMError("LLM API request timed out (max 60s)")
             except httpx.HTTPStatusError as e:
                 status = e.response.status_code
                 # Retry only on rate limit / server errors; fail fast on 4xx.
                 if status == 429 or status >= 500:
-                    last_error = DeepSeekError(
-                        f"DeepSeek API error {status}: {self._parse_error_response(e.response)}"
+                    last_error = LLMError(
+                        f"LLM API error {status}: {self._parse_error_response(e.response)}"
                     )
                 else:
-                    raise DeepSeekError(
-                        f"DeepSeek API error {status}: {self._parse_error_response(e.response)}"
+                    raise LLMError(
+                        f"LLM API error {status}: {self._parse_error_response(e.response)}"
                     )
             except Exception as e:
-                last_error = DeepSeekError(f"DeepSeek API request failed: {str(e)}")
+                last_error = LLMError(f"LLM API request failed: {str(e)}")
 
             # Backoff before the next attempt (0.5s, 1s) — not after the last one.
             if attempt < max_attempts - 1:
                 await asyncio.sleep(0.5 * (attempt + 1))
 
         if response is None:
-            raise last_error or DeepSeekError("DeepSeek API request failed after retries")
+            raise last_error or LLMError("LLM API request failed after retries")
 
         try:
             result = response.json()
         except Exception as e:
-            raise DeepSeekError(f"Failed to parse DeepSeek response JSON: {str(e)}")
+            raise LLMError(f"Failed to parse LLM response JSON: {str(e)}")
 
         # Check for API-level errors
         if "error" in result:
-            raise DeepSeekError(f"DeepSeek API error: {result['error']}")
+            raise LLMError(f"LLM API error: {result['error']}")
 
         # Extract JSON from response content (response_format: json_object)
         try:
@@ -141,7 +139,7 @@ class DeepSeekClient:
             content = choice.get("message", {}).get("content", "")
 
             if not content:
-                raise DeepSeekError("Empty response from DeepSeek")
+                raise LLMError("Empty response from the LLM")
 
             # Try to parse as JSON directly
             try:
@@ -155,10 +153,10 @@ class DeepSeekClient:
             if json_match:
                 return json.loads(json_match.group())
 
-            raise DeepSeekError(f"Could not parse JSON from response: {content[:200]}")
+            raise LLMError(f"Could not parse JSON from response: {content[:200]}")
 
         except (KeyError, IndexError, json.JSONDecodeError) as e:
-            raise DeepSeekError(f"Failed to parse DeepSeek structured output: {str(e)}")
+            raise LLMError(f"Failed to parse LLM structured output: {str(e)}")
 
     def _parse_error_response(self, response: httpx.Response) -> str:
         """Extract a human-readable error message from an API error response."""

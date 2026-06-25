@@ -7,10 +7,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# ─── DeepSeek API ───────────────────────────────────────────────────
-DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
-DEEPSEEK_MODEL = os.getenv("DEEPSEEK_MODEL", "deepseek-v4-flash")
-DEEPSEEK_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
+# ─── LLM API (OpenAI-compatible) ───────────────────────────────────
+# Provider-agnostic. Set these as environment variables (no provider-revealing
+# defaults are hardcoded here): LLM_API_KEY, LLM_MODEL, LLM_BASE_URL.
+LLM_API_KEY = os.getenv("LLM_API_KEY", "")
+LLM_MODEL = os.getenv("LLM_MODEL", "")
+LLM_BASE_URL = os.getenv("LLM_BASE_URL", "")
 
 # ─── x402 Payment (USDC on Base) ───────────────────────────────────
 X402_WALLET_ADDRESS = os.getenv("X402_WALLET_ADDRESS", "")

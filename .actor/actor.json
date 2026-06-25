@@ -9,8 +9,7 @@
   "output": "./output_schema.json",
   "dockerfile": "../Dockerfile",
   "environmentVariables": {
-    "DEEPSEEK_API_KEY": "",
-    "DEEPSEEK_MODEL": "deepseek-v4-flash",
+    "LLM_API_KEY": "",
     "DEFAULT_LANGUAGE": "eng+ita+spa"
   },
   "minMemoryMbytes": 1024,
