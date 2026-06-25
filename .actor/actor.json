@@ -3,7 +3,7 @@
   "name": "document-to-json-converter",
   "title": "Document-to-JSON Converter",
   "description": "Convert PDF invoices, bank statements, and contracts into clean structured JSON. AI-powered, OCR for scanned PDFs. Just pass a public PDF URL. Ideal as an MCP tool for AI agents.",
-  "version": "0.0",
+  "version": "1.0",
   "buildTag": "latest",
   "input": "../INPUT_SCHEMA.json",
   "output": "./output_schema.json",
